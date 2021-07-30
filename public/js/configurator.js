@@ -368,6 +368,56 @@ var configurator = new function() {
       ]
     },
     {
+      name: 'WheelBlock',
+      category: 'Blocks',
+      defaultConfig: {
+        type: 'WheelBlock',
+        position: [0, 2.8, 0],
+        rotation: [0, 0, 0],
+        options: {
+          wheelDiameter: 5.6,
+          wheelWidth: 0.8,
+          wheelMass: 200,
+          wheelFriction: 10
+        }
+      },
+      optionsConfigurations: [
+        {
+          option: 'position',
+          type: 'vectors',
+          min: '-20',
+          max: '20',
+          step: '1',
+          reset: true
+        },
+        {
+          option: 'rotation',
+          type: 'vectors',
+          min: '-180',
+          max: '180',
+          step: '5',
+          deg2rad: true,
+          reset: true
+        },
+        {
+          option: 'wheelDiameter',
+          type: 'slider',
+          min: '1',
+          max: '10',
+          step: '0.1',
+          reset: true
+        },
+        {
+          option: 'wheelWidth',
+          type: 'slider',
+          min: '0.2',
+          max: '4',
+          step: '0.1',
+          reset: true
+        },
+      ]
+    },
+    {
       name: 'ColorSensor',
       category: 'Sensors',
       defaultConfig: {
@@ -1012,6 +1062,7 @@ var configurator = new function() {
         type: 'WheelActuator',
         position: [0, 2.8, 0],
         rotation: [0, 0, 0],
+        components: [],
         options: {
           wheelDiameter: 5.6,
           wheelWidth: 0.8,
@@ -1387,6 +1438,7 @@ var configurator = new function() {
       && $selected[0].component.type != 'ArmActuator'
       && $selected[0].component.type != 'SwivelActuator'
       && $selected[0].component.type != 'LinearActuator'
+      && $selected[0].component.type != 'WheelActuator'
     ) {
       toastMsg('Components can only be added to Body and Actuators.');
       return;
@@ -1538,7 +1590,7 @@ var configurator = new function() {
   this.loadIntoComponentsWindow = function(options) {
     let PORT_LETTERS = ' ABCDEFGHIJKLMNOPQRSTUVWXYZ';
     let ACTUATORS = ['MagnetActuator', 'ArmActuator', 'SwivelActuator', 'LinearActuator', 'PaintballLauncherActuator','WheelActuator'];
-    let DUMB_BLOCKS = ['Box', 'Cylinder', 'Sphere'];
+    let DUMB_BLOCKS = ['Box', 'Cylinder', 'Sphere','WheelBlock'];
     let motorCount = options.wheels ? 2 : 0;
     let sensorCount = 0;
     let componentIndex = 0;

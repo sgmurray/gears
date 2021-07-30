@@ -630,6 +630,99 @@ function CylinderBlock(scene, parent, pos, rot, options) {
   this.init();
 }
 
+function WheelBlock(scene, parent, pos, rot, options) {
+  var self = this;
+
+  this.type = 'WheelBlock';
+  this.options = null;
+
+  this.position = new BABYLON.Vector3(pos[0], pos[1], pos[2]);
+  this.rotation = new BABYLON.Vector3(rot[0], rot[1], rot[2]);
+
+  this.TIRE_DOWNWARDS_FORCE = new BABYLON.Vector3(0, -4000, 0);
+
+  this.init = function() {
+    self.setOptions(options);
+
+    var wheelMat = scene.getMaterialByID('wheel');
+    if (wheelMat == null) {
+      var wheelMat = new BABYLON.StandardMaterial('wheel', scene);
+      var wheelTexture = new BABYLON.Texture('textures/robot/wheel.png', scene);
+      wheelMat.diffuseTexture = wheelTexture;
+      wheelMat.specularColor = new BABYLON.Color3(0.2, 0.2, 0.2);
+      wheelMat.freeze();
+    }
+
+    var faceUV = new Array(3);
+    faceUV[0] = new BABYLON.Vector4(0, 0, 200/828, 1);
+    faceUV[1] = new BABYLON.Vector4(200/828, 3/4, 1, 1);
+    faceUV[2] = new BABYLON.Vector4(0, 0, 200/828, 1);
+    let wheelOptions = {
+      height: self.options.width,
+      diameter: self.options.diameter,
+      tessellation: 24,
+      faceUV: faceUV
+    };
+
+    self.mesh = BABYLON.MeshBuilder.CreateCylinder('wheelBlock', wheelOptions, scene);
+    self.body = self.mesh;
+    self.mesh.component = self;
+    self.mesh.material = wheelMat;
+    scene.shadowGenerator.addShadowCaster(self.mesh);
+
+    self.mesh.physicsImpostor = new BABYLON.PhysicsImpostor(
+      self.mesh,
+      BABYLON.PhysicsImpostor.CylinderImpostor,
+      {
+        mass: self.options.mass,
+        restitution: 0.8,
+        friction: self.options.friction
+      },
+      scene
+    );
+    self.mesh.parent = parent;
+    self.mesh.position = self.position;
+    self.mesh.rotation.z = -Math.PI / 2;
+    self.mesh.rotate(BABYLON.Axis.Y, rot[1], BABYLON.Space.LOCAL);
+    self.mesh.rotate(BABYLON.Axis.X, rot[0], BABYLON.Space.LOCAL);
+    self.mesh.rotate(BABYLON.Axis.Z, rot[2], BABYLON.Space.LOCAL);
+
+
+  };
+
+  this.render = function(delta) {
+    if (
+      typeof self.mesh == 'undefined' ||
+      self.mesh == null ||
+      typeof self.mesh.physicsImpostor == 'undefined'
+      || self.mesh.physicsImpostor == null
+    ) {
+      return;
+    }
+
+    self.mesh.physicsImpostor.applyForce(self.TIRE_DOWNWARDS_FORCE, self.mesh.getAbsolutePosition());
+  };
+
+  this.setOptions = function(options) {
+    self.options = {
+      diameter: 5.6,
+      width: 0.8,
+      mass: 200,
+      friction: 10
+    };
+
+    for (let name in options) {
+      if (typeof self.options[name] == 'undefined') {
+        console.log('Unrecognized option: ' + name);
+      } else {
+        self.options[name] = options[name];
+      }
+    }
+  };
+  this.init();
+}
+
+
 // Just a dumb sphere with physics
 function SphereBlock(scene, parent, pos, rot, options) {
   var self = this;

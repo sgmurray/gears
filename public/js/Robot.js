@@ -390,7 +390,14 @@ function Robot() {
           parent,
           componentConfig.position,
           componentConfig.rotation,
-          componentConfig.options);
+          componentConfig.options);  
+      } else if (componentConfig.type == 'WheelBlock') {
+        component = new WheelBlock(
+          self.scene,
+          parent,
+          componentConfig.position,
+          componentConfig.rotation,
+          componentConfig.options); 
       } else if (componentConfig.type == 'MagnetActuator') {
         component = new MagnetActuator(
           self.scene,

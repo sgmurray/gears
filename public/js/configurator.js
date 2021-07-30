@@ -368,6 +368,56 @@ var configurator = new function() {
       ]
     },
     {
+      name: 'WheelBlock',
+      category: 'Blocks',
+      defaultConfig: {
+        type: 'WheelBlock',
+        position: [0, 2.8, 0],
+        rotation: [0, 0, 0],
+        options: {
+          wheelDiameter: 5.6,
+          wheelWidth: 0.8,
+          wheelMass: 200,
+          wheelFriction: 10
+        }
+      },
+      optionsConfigurations: [
+        {
+          option: 'position',
+          type: 'vectors',
+          min: '-20',
+          max: '20',
+          step: '1',
+          reset: true
+        },
+        {
+          option: 'rotation',
+          type: 'vectors',
+          min: '-180',
+          max: '180',
+          step: '5',
+          deg2rad: true,
+          reset: true
+        },
+        {
+          option: 'diameter',
+          type: 'slider',
+          min: '1',
+          max: '10',
+          step: '0.1',
+          reset: true
+        },
+        {
+          option: 'width',
+          type: 'slider',
+          min: '0.2',
+          max: '4',
+          step: '0.1',
+          reset: true
+        },
+      ]
+    },
+    {
       name: 'ColorSensor',
       category: 'Sensors',
       defaultConfig: {
@@ -1761,7 +1811,7 @@ var configurator = new function() {
   this.loadIntoComponentsWindow = function(options) {
     let PORT_LETTERS = ' ABCDEFGHIJKLMNOPQRSTUVWXYZ';
     let ACTUATORS = ['MagnetActuator', 'ArmActuator', 'SwivelActuator', 'LinearActuator', 'PaintballLauncherActuator','WheelActuator'];
-    let DUMB_BLOCKS = ['Box', 'Cylinder', 'Sphere', 'WheelPassive'];
+    let DUMB_BLOCKS = ['Box', 'Cylinder', 'Sphere', 'WheelPassive','WheelBlock'];
     let motorCount = options.wheels ? 2 : 0;
     let sensorCount = 0;
     let componentIndex = 0;

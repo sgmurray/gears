@@ -2343,6 +2343,158 @@ function PaintballLauncherActuator(scene, parent, pos, rot, port, options) {
   this.init();
 }
 
+function PassiveWheel(scene, parent, pos, rot, options) {
+  var self = this;
+
+  this.type = 'PassiveWheel';
+  this.options = null;
+
+  this.components = [];
+
+  this.bodyPosition = new BABYLON.Vector3(pos[0], pos[1], pos[2]);
+  this.rotation = new BABYLON.Vector3(rot[0], rot[1], rot[2]);
+  this.initialQuaternion = new BABYLON.Quaternion.FromEulerAngles(rot[0], rot[1], rot[2]);
+
+
+  this.mesh = null;
+  this.joint = null;
+
+  this.init = function() {
+    self.setOptions(options);
+
+    var wheelMat = scene.getMaterialByID('wheel');
+    if (wheelMat == null) {
+      var wheelMat = new BABYLON.StandardMaterial('wheel', scene);
+      var wheelTexture = new BABYLON.Texture('textures/robot/wheel.png', scene);
+      wheelMat.diffuseTexture = wheelTexture;
+      wheelMat.specularColor = new BABYLON.Color3(0.2, 0.2, 0.2);
+      wheelMat.freeze();
+    }
+
+    var faceUV = new Array(3);
+    faceUV[0] = new BABYLON.Vector4(0, 0, 200/828, 1);
+    faceUV[1] = new BABYLON.Vector4(200/828, 3/4, 1, 1);
+    faceUV[2] = new BABYLON.Vector4(0, 0, 200/828, 1);
+    let wheelOptions = {
+      height: self.options.wheelWidth,
+      diameter: self.options.wheelDiameter,
+      tessellation: 24,
+      faceUV: faceUV
+    };
+
+    self.mesh = BABYLON.MeshBuilder.CreateCylinder('wheel', wheelOptions, scene);
+    self.body = self.mesh;
+    self.end = self.mesh;
+    self.mesh.material = wheelMat;
+    
+    self.mesh.parent = parent;
+    self.mesh.position = self.bodyPosition;
+    self.mesh.rotation.z = -Math.PI / 2;
+    self.mesh.rotate(BABYLON.Axis.Y, rot[1], BABYLON.Space.LOCAL);
+    self.mesh.rotate(BABYLON.Axis.X, rot[0], BABYLON.Space.LOCAL);
+    self.mesh.rotate(BABYLON.Axis.Z, rot[2], BABYLON.Space.LOCAL);
+    parent.removeChild(self.mesh);
+
+    scene.shadowGenerator.addShadowCaster(self.mesh);
+  };
+
+  this.loadImpostor = function(){
+    self.mesh.physicsImpostor = new BABYLON.PhysicsImpostor(
+      self.mesh,
+      BABYLON.PhysicsImpostor.CylinderImpostor,
+      {
+        mass: options.wheelMass,
+        restitution: 0.8,
+        friction: options.wheelFriction
+      },
+      scene
+    );
+
+    self.mesh.physicsImpostor.physicsBody.setDamping(0,0.5);
+
+    // Hold position if speed is too low
+    var origin = self.mesh.physicsImpostor.physicsBody.getWorldTransform().getOrigin();
+    var lastOrigin = [
+        origin.x(),
+        origin.y(),
+        origin.z()
+    ];
+
+    self.mesh.physicsImpostor.registerBeforePhysicsStep(function(){
+      if (self.mesh.physicsImpostor.getLinearVelocity().lengthSquared() < 0.1) {
+        origin.setX(lastOrigin[0]);
+        origin.setY(lastOrigin[1]);
+        origin.setZ(lastOrigin[2]);
+      } else {
+        lastOrigin = [
+          origin.x(),
+          origin.y(),
+          origin.z()
+        ];
+      }
+    });
+  };
+
+  this.loadJoints = function(){
+    var wheel2world = self.mesh.absoluteRotationQuaternion;
+    
+    let zero = BABYLON.Vector3.Zero();
+    var world2body = parent.absoluteRotationQuaternion;
+    world2body = BABYLON.Quaternion.Inverse(world2body);
+
+    var mainPivot = self.mesh.position.subtract(parent.position);
+    mainPivot.rotateByQuaternionAroundPointToRef(world2body, zero, mainPivot);
+
+    var mainAxis = new BABYLON.Vector3(0, 1, 0);
+    mainAxis.rotateByQuaternionAroundPointToRef(wheel2world, zero, mainAxis);
+    mainAxis.rotateByQuaternionAroundPointToRef(world2body, zero, mainAxis);
+
+    /*
+    self.wheelVector = new BABYLON.Vector3(1,0,0);
+    self.bodyVector = new BABYLON.Vector3(0,0,0);
+    self.wheelVector.rotateByQuaternionAroundPointToRef(wheel2world, zero, self.bodyVector);
+    self.bodyVector.rotateByQuaternionAroundPointToRef(world2body, zero, self.bodyVector);
+    self.normalVector = new BABYLON.Vector3(0,1,0);
+    */
+
+    self.joint = new BABYLON.PhysicsJoint(BABYLON.PhysicsJoint.HingeJoint, {
+      mainPivot: mainPivot,
+      connectedPivot: new BABYLON.Vector3(0, 0, 0),
+      mainAxis: mainAxis,
+      connectedAxis: new BABYLON.Vector3(0, 1, 0),
+    });
+    parent.physicsImpostor.addJoint(self.mesh.physicsImpostor, self.joint);
+  };
+
+
+  this.setOptions = function(options) {
+    self.options = {
+      wheelDiameter: 5.6,
+      wheelWidth: 0.8,
+      wheelMass: 200,
+      wheelFriction: 10
+    };
+
+    for (let name in options) {
+      if (typeof self.options[name] == 'undefined') {
+        console.log('Unrecognized option: ' + name);
+      } else {
+        self.options[name] = options[name];
+      }
+    }
+  };
+
+  this.reset = function() {
+    // TODO set linear and angular velocity to 0
+  };
+
+  //
+  // Used in JS
+  //
+  this.init();
+}
+
+
 function Pen(scene, parent, pos, rot, port, options) {
   var self = this;
 

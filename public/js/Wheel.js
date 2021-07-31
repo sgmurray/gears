@@ -117,6 +117,7 @@ function Wheel(scene, parent, pos, rot, port, options) {
 
     self.mesh = BABYLON.MeshBuilder.CreateCylinder('wheel', wheelOptions, scene);
     self.body = self.mesh;
+    self.end = self.mesh;
     self.mesh.material = wheelMat;
     
     self.mesh.parent = parent;
@@ -298,7 +299,24 @@ function Wheel(scene, parent, pos, rot, port, options) {
     if (reversed) {
       speed = -speed;
     }
-    self.joint.setMotor(speed, self.MOTOR_POWER_DEFAULT);
+    // Torque speed curve simulation
+    
+    let cur_speed = self.speed / 180 * Math.PI * (reversed ? 1 : -1);
+    let power = 0;
+    if (Math.sign(speed) == Math.sign(cur_speed)){
+      power = 6000 * (1 -  Math.min(Math.abs(cur_speed), self.MAX_SPEED) / self.MAX_SPEED);
+    }
+    else {
+      power = 6000;
+    }
+    
+    
+    power = 6000;
+    self.joint.setMotor(speed, power);
+    //console.log(power);
+    
+    //self.joint.setMotor(speed, self.MOTOR_POWER_DEFAULT);
+    //self.joint.setMotor(speed, 6000);
   };
 
   this.updatePosition = function(delta) {

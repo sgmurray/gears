@@ -437,6 +437,13 @@ function Robot() {
           componentConfig.rotation,
           'out' + PORT_LETTERS[(++self.motorCount)],
           componentConfig.options);
+      } else if (componentConfig.type == 'PassiveWheel') {
+        component = new PassiveWheel(
+          self.scene,
+          parent,
+          componentConfig.position,
+          componentConfig.rotation,
+          componentConfig.options);
       } else if (componentConfig.type == 'Pen') {
         component = new Pen(
           self.scene,
@@ -553,7 +560,7 @@ function Robot() {
     if (self.rightWheel != null) {
       self.rightWheel.render(delta);
     }
-
+    
     self.components.forEach(function(component) {
       if (typeof component.render == 'function') {
         component.render(delta);

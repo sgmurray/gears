@@ -300,7 +300,7 @@ function Wheel(scene, parent, pos, rot, port, options) {
       speed = -speed;
     }
     // Torque speed curve simulation
-    
+    /*
     let cur_speed = self.speed / 180 * Math.PI * (reversed ? 1 : -1);
     let power = 0;
     if (Math.sign(speed) == Math.sign(cur_speed)){
@@ -312,10 +312,12 @@ function Wheel(scene, parent, pos, rot, port, options) {
     
     
     power = 6000;
+    
     self.joint.setMotor(speed, power);
+    */
     //console.log(power);
     
-    //self.joint.setMotor(speed, self.MOTOR_POWER_DEFAULT);
+    self.joint.setMotor(speed, self.MOTOR_POWER_DEFAULT);
     //self.joint.setMotor(speed, 6000);
   };
 
